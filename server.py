@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 from cowpy import cow
 import os
+import json
 
 
 httpcow = '''<!DOCTYPE html>
@@ -27,6 +28,7 @@ httpcow = '''<!DOCTYPE html>
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        cheese = cow.Moose()
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
 
@@ -39,17 +41,67 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
-            self.wfile.write(b'<html><body><h1>Hello world</h1></body></html>')
+            self.wfile.write(httpcow.encode())
             return
 
-        elif parsed_path.path == '/cow?msg=text':
-            print(parse_qs)
+        elif parsed_path.path == '/cow':
+            try:
+                if len(parsed_qs['msg'][0]) < 1:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(b'400 Bad Request')
+                    return
+                msg = cheese.milk(parsed_qs['msg'][0])
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(f'''<html><body>{msg}</body></html>'''.encode())
+                return
+            except KeyError:
+                self.send_response(400)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(b'400 Bad Request')
+                return
 
         self.send_response(404)
         self.end_headers()
 
     def do_POST(self):
-        pass
+        cheese = cow.Moose()
+        parsed_path = urlparse(self.path)
+        parsed_qs = parse_qs(parsed_path.query)
+
+        # set a status code
+        # set any headers
+        # set any body data on the response
+        # end headers
+
+        if parsed_path.path == '/cow':
+            try:
+                if len(parsed_qs['msg'][0]) < 1:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(b'400 Bad Request')
+                    return
+                msg = cheese.milk(parsed_qs['msg'][0])
+                return_json = f'{{"content": "{msg}"}}'
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(return_json.encode())
+                return
+            except KeyError:
+                self.send_response(400)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(b'400 Bad Request')
+                return
+
+        self.send_response(404)
+        self.end_headers()
 
 
 def create_server():
