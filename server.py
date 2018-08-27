@@ -25,9 +25,11 @@ httpcow = '''<!DOCTYPE html>
 </html>'''
 
 
-
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        """
+        This method will allow you to send HTTP Requests
+        """
         cheese = cow.Moose()
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
@@ -69,6 +71,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        """
+        This is the method that will allow us to post
+        """
         cheese = cow.Moose()
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
@@ -105,6 +110,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 def create_server():
+    """
+    This method will create the server
+    """
     return HTTPServer(
         ('127.0.0.1', int(os.environ['PORT'])),
         SimpleHTTPRequestHandler
@@ -112,6 +120,9 @@ def create_server():
 
 
 def run_forever():
+    """
+    This method will run the server until an interrupt occurs
+    """
     server = create_server()
 
     try:
